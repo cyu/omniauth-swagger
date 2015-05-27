@@ -1,0 +1,56 @@
+{
+  "swagger": "2.0",
+
+  "info": {
+    "title": "Github",
+    "version":  "3"
+  },
+
+  "host": "api.github.com",
+
+  "basePath": "/",
+
+  "schemes": ["https"],
+
+  "produces": ["application/json"],
+
+  "securityDefinitions": {
+    "oauth2": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "https://github.com/login/oauth/authorize",
+      "tokenUrl": "https://github.com/login/oauth/access_token",
+      "scopes": [
+        "user",
+        "user:email",
+        "user:follow",
+        "public_repo",
+        "repo",
+        "repo_deployment",
+        "repo:status",
+        "delete_repo",
+        "notifications",
+        "gist",
+        "read:repo_hook",
+        "write:repo_hook",
+        "admin:repo_hook",
+        "admin:org_hook",
+        "read:org",
+        "write:org",
+        "admin:org",
+        "read:public_key",
+        "write:public_key",
+        "admin:public_key"
+      ]
+    }
+  },
+
+  "paths": {
+    "/user": {
+      "get": {
+        "summary": "Get the authenticated user",
+        "operationId": "getUser"
+      }                             
+    }
+  }
+}

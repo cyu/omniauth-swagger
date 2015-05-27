@@ -1,0 +1,4 @@
+machine github
+        login GITHUB_CLIENT_ID
+        password GITHUB_CLIENT_SECRET
+
