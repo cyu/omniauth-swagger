@@ -40,6 +40,8 @@ module OmniAuth
         if uid_option.kind_of? Hash
           if uid_option[:api]
             uid_from_api(uid_option[:api])
+          elsif uid_option[:param]
+            access_token.params[uid_option[:param]]
           else
             raise "Unsupported UID option: #{uid_option.inspect}"
           end

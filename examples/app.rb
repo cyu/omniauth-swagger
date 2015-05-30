@@ -24,6 +24,12 @@ configure do
         client_secret: n['slack'][1],
         scope: 'identity',
         uid: "test_auth#user_id"
+      },
+      stripe_connect: {
+        uri: File.join(File.dirname(__FILE__), 'stripe_connect.json'),
+        client_id: n['stripe_connect'][0],
+        client_secret: n['stripe_connect'][1],
+        uid: { param: "stripe_user_id" }
       }
     }
   end
@@ -36,6 +42,7 @@ get '/' do
       <ol>
         <li><a href="/auth/swagger?provider=github">Github</a></li>
         <li><a href="/auth/swagger?provider=slack">Slack</a></li>
+        <li><a href="/auth/swagger?provider=stripe_connect">Stripe Connect</a></li>
       </ol>
     </body>
     </html>
