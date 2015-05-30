@@ -1,4 +1,9 @@
 machine github
         login GITHUB_CLIENT_ID
         password GITHUB_CLIENT_SECRET
-
+machine slack
+        login SLACK_CLIENT_ID
+        password SLACK_CLIENT_SECRET
+machine stripe_connect
+        login STRIPE_CONNECT_CLIENT_ID
+        password STRIPE_CONNECT_CLIENT_SECRET
