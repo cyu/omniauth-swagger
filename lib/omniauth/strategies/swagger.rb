@@ -18,7 +18,11 @@ module OmniAuth
 
       def authorize_params
         super.tap do |params|
-          %w[scope].each do |v|
+          passthru_params = @definition.authorize_params || []
+          if @definition.scopes != nil && @definition.scopes.any?
+            passthru_params << 'scope'
+          end
+          passthru_params.each do |v|
             if request.params[v]
               params[v.to_sym] = request.params[v]
             end
@@ -32,13 +36,26 @@ module OmniAuth
       end
 
       uid do
-        operation, key = provider_options[:uid].split('#')
-        raw_info[key].to_s
+        uid_option = provider_options[:uid]
+        if uid_option.kind_of? Hash
+          if uid_option[:api]
+            uid_from_api(uid_option[:api])
+          else
+            raise "Unsupported UID option: #{uid_option.inspect}"
+          end
+        else
+          uid_from_api(uid_option)
+        end
       end
 
       protected
         def provider_options
           @provider_options ||= options[:providers][request.params['provider']]
+        end
+
+        def uid_from_api(signature)
+          operation, key = signature.split('#')
+          raw_info[key].to_s
         end
 
         def raw_info

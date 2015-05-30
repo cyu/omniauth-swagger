@@ -27,5 +27,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.0"
 
   spec.add_dependency "omniauth-oauth2", "~> 1.3.0"
-  spec.add_dependency "diesel-api-dsl", ">= 0.1.1"
+  spec.add_dependency "diesel-api-dsl", ">= 0.1.3"
 end

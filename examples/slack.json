@@ -1,0 +1,46 @@
+{
+  "swagger": "2.0",
+
+  "info": {
+    "title": "Slack Web API",
+    "version":  "1.0"
+  },
+
+  "host": "slack.com",
+
+  "basePath": "/api",
+
+  "schemes": ["https"],
+
+  "produces": ["application/json"],
+
+  "securityDefinitions": {
+    "oauth2": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "in": "query",
+      "name": "token",
+      "authorizationUrl": "https://slack.com/oauth/authorize",
+      "tokenUrl": "https://slack.com/api/oauth.access",
+      "scopes": {
+        "identify": "Allows applications to confirm your identity.",
+        "read": "Allows applications to read any messages and state that the user can see.",
+        "post": "Allows applications to write messages and create content on behalf of the user.",
+        "client": "Allows applications to connect to slack as a client, and post messages on behalf of the user.",
+        "admin": "Allows applications to perform administrative actions, requires the authed user is an admin."
+      },
+      "x-authorizeParameters": [
+        "team"
+      ]
+    }
+  },
+
+  "paths": {
+    "/auth.test": {
+      "get": {
+        "summary": "Checks authentication & identity.",
+        "operationId": "testAuth"
+      }
+    }
+  }
+}

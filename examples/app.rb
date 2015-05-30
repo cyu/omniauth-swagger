@@ -17,13 +17,29 @@ configure do
         client_secret: n['github'][1],
         scope: 'user',
         uid: "get_user#id"
+      },
+      slack: {
+        uri: File.join(File.dirname(__FILE__), 'slack.json'),
+        client_id: n['slack'][0],
+        client_secret: n['slack'][1],
+        scope: 'identity',
+        uid: "test_auth#user_id"
       }
     }
   end
 end
 
-get '/auth' do
-  redirect to('/auth/swagger?provider=github')
+get '/' do
+  <<-HTML
+    <html>
+    <body>
+      <ol>
+        <li><a href="/auth/swagger?provider=github">Github</a></li>
+        <li><a href="/auth/swagger?provider=slack">Slack</a></li>
+      </ol>
+    </body>
+    </html>
+  HTML
 end
 
 get '/auth/:provider/callback' do

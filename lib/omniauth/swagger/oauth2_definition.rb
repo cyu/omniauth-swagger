@@ -20,6 +20,14 @@ module OmniAuth
       def oauth2_key
         @security_def.id.to_sym
       end
+
+      def scopes
+        @security_def.scopes ? @security_def.scopes.keys : []
+      end
+
+      def authorize_params
+        @security_def.extensions[:authorize_parameters]
+      end
     end
 
   end
