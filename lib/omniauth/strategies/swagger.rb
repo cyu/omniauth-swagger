@@ -1,8 +1,8 @@
 require 'omniauth-oauth2'
 require 'open-uri'
 require 'omniauth/swagger/oauth2_definition'
+require 'omniauth/swagger/default_provider_lookup'
 require 'diesel'
-require 'yaml'
 
 module OmniAuth
   module Strategies
@@ -16,7 +16,8 @@ module OmniAuth
 
       PARAM_PROVIDER = 'provider'.freeze
 
-      option :providers, {}
+      option :providers, nil
+      option :provider_lookup, nil
 
       def setup_phase
         load_definition
@@ -63,14 +64,12 @@ module OmniAuth
         end
 
         def provider_options
-          @provider_options ||= begin
-                                  defaults = provider_defaults[provider_name] || {}
-                                  defaults.merge(options[:providers][provider_name])
-                                end
+          @provider_options ||= provider_lookup.get(provider_name)
         end
 
-        def provider_defaults
-          @provider_defaults ||= YAML.load_file(File.join(File.dirname(__FILE__), 'swagger_providers.yml'))
+        def provider_lookup
+          @provider_lookup ||= options[:provider_lookup] ||
+            OmniAuth::Swagger::DefaultProviderLookup.new(options[:providers])
         end
 
         def uid_api
