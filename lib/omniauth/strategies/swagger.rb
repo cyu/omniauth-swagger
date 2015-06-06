@@ -2,11 +2,19 @@ require 'omniauth-oauth2'
 require 'open-uri'
 require 'omniauth/swagger/oauth2_definition'
 require 'diesel'
+require 'yaml'
 
 module OmniAuth
   module Strategies
 
     class Swagger < OmniAuth::Strategies::OAuth2
+
+      OPTION_UID = 'uid'.freeze
+      OPTION_UID_API = 'api'.freeze
+      OPTION_UID_PARAM = 'param'.freeze
+      OPTION_URI = 'uri'.freeze
+
+      PARAM_PROVIDER = 'provider'.freeze
 
       option :providers, {}
 
@@ -32,39 +40,53 @@ module OmniAuth
 
       def callback_url
         url = super
-        url + (url.index('?') ? '&' : '?') + "provider=#{request.params['provider']}"
+        url + (url.index('?') ? '&' : '?') + "provider=#{provider_name}"
       end
 
       uid do
-        uid_option = provider_options[:uid]
-        if uid_option.kind_of? Hash
-          if uid_option[:api]
-            uid_from_api(uid_option[:api])
-          elsif uid_option[:param]
-            access_token.params[uid_option[:param]]
+        if uid_api
+          operation, key = uid_api.split('#')
+          raw_info[key].to_s
+        else
+          uid_option = provider_options[OPTION_UID]
+          if uid_option[OPTION_UID_PARAM]
+            access_token.params[uid_option[OPTION_UID_PARAM]]
           else
             raise "Unsupported UID option: #{uid_option.inspect}"
           end
-        else
-          uid_from_api(uid_option)
         end
       end
 
       protected
-        def provider_options
-          @provider_options ||= options[:providers][request.params['provider']]
+        def provider_name
+          @provider_name ||= request.params[PARAM_PROVIDER].to_sym
         end
 
-        def uid_from_api(signature)
-          operation, key = signature.split('#')
-          raw_info[key].to_s
+        def provider_options
+          @provider_options ||= begin
+                                  defaults = provider_defaults[provider_name] || {}
+                                  defaults.merge(options[:providers][provider_name])
+                                end
+        end
+
+        def provider_defaults
+          @provider_defaults ||= YAML.load_file(File.join(File.dirname(__FILE__), 'swagger_providers.yml'))
+        end
+
+        def uid_api
+          opt = provider_options[OPTION_UID]
+          opt.kind_of?(Hash) ? opt[OPTION_UID_API] : opt
         end
 
         def raw_info
-          api_class = Diesel.build_api(specification)
-          api = api_class.new(@definition.oauth2_key => {token: access_token.token})
-          operation, key = provider_options[:uid].split('#')
-          api.__send__(operation, {})
+          if uid_api
+            api_class = Diesel.build_api(specification)
+            api = api_class.new(@definition.oauth2_key => {token: access_token.token})
+            operation, key = uid_api.split('#')
+            api.__send__(operation, {})
+          else
+            {}
+          end
         end
 
         def load_definition
@@ -81,7 +103,7 @@ module OmniAuth
         end
 
         def load_specification
-          uri = provider_options[:uri]
+          uri = provider_options[OPTION_URI]
           spec = nil
           open(uri) do |f|
             spec = Diesel::Swagger::Parser.new.parse(f)

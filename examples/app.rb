@@ -15,21 +15,18 @@ configure do
         uri: File.join(File.dirname(__FILE__), 'github.json'),
         client_id: n['github'][0],
         client_secret: n['github'][1],
-        scope: 'user',
-        uid: "get_user#id"
+        scope: 'user'
       },
       slack: {
         uri: File.join(File.dirname(__FILE__), 'slack.json'),
         client_id: n['slack'][0],
         client_secret: n['slack'][1],
-        scope: 'identity',
-        uid: "test_auth#user_id"
+        scope: 'identity'
       },
       stripe_connect: {
         uri: File.join(File.dirname(__FILE__), 'stripe_connect.json'),
         client_id: n['stripe_connect'][0],
-        client_secret: n['stripe_connect'][1],
-        uid: { param: "stripe_user_id" }
+        client_secret: n['stripe_connect'][1]
       }
     }
   end
