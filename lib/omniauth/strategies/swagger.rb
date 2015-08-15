@@ -1,5 +1,4 @@
 require 'omniauth-oauth2'
-require 'open-uri'
 require 'omniauth/swagger/oauth2_definition'
 require 'omniauth/swagger/default_provider_lookup'
 require 'diesel'
@@ -12,12 +11,11 @@ module OmniAuth
       OPTION_UID = 'uid'.freeze
       OPTION_UID_API = 'api'.freeze
       OPTION_UID_PARAM = 'param'.freeze
-      OPTION_URI = 'uri'.freeze
-
-      PARAM_PROVIDER = 'provider'.freeze
+      OPTION_SPECIFICATION = 'specification'.freeze
 
       option :providers, nil
       option :provider_lookup, nil
+      option :provider_param, 'provider'
 
       def setup_phase
         load_definition
@@ -41,7 +39,7 @@ module OmniAuth
 
       def callback_url
         url = super
-        url + (url.index('?') ? '&' : '?') + "provider=#{provider_name}"
+        url + (url.index('?') ? '&' : '?') + "#{options[:provider_param]}=#{provider_name}"
       end
 
       uid do
@@ -60,16 +58,25 @@ module OmniAuth
 
       protected
         def provider_name
-          @provider_name ||= request.params[PARAM_PROVIDER].to_sym
+          @provider_name ||= request.params[options[:provider_param]].to_sym
         end
 
         def provider_options
-          @provider_options ||= provider_lookup.get(provider_name)
+          @provider_options ||= provider_lookup.get(provider_name, env)
         end
 
         def provider_lookup
-          @provider_lookup ||= options[:provider_lookup] ||
-            OmniAuth::Swagger::DefaultProviderLookup.new(options[:providers])
+          @provider_lookup ||= begin
+                                 if lookup_opt = options[:provider_lookup]
+                                   if lookup_opt.kind_of? Class
+                                     lookup_opt.new
+                                   else
+                                     lookup_opt
+                                   end
+                                 else
+                                   OmniAuth::Swagger::DefaultProviderLookup.new(options[:providers])
+                                 end
+                               end
         end
 
         def uid_api
@@ -102,12 +109,7 @@ module OmniAuth
         end
 
         def load_specification
-          uri = provider_options[OPTION_URI]
-          spec = nil
-          open(uri) do |f|
-            spec = Diesel::Swagger::Parser.new.parse(f)
-          end
-          spec
+          provider_options[OPTION_SPECIFICATION].call
         end
 
     end
