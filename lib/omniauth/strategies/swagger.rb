@@ -56,6 +56,10 @@ module OmniAuth
         end
       end
 
+      extra do
+        { "raw_info" => raw_info }
+      end
+
       protected
         def provider_name
           @provider_name ||= request.params[options[:provider_param]].to_sym
