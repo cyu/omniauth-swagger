@@ -12,6 +12,7 @@ module OmniAuth
       OPTION_UID_API = 'api'.freeze
       OPTION_UID_PARAM = 'param'.freeze
       OPTION_SPECIFICATION = 'specification'.freeze
+      OPTION_SUBDOMAIN = 'subdomain'.freeze
 
       option :providers, nil
       option :provider_lookup, nil
@@ -45,7 +46,8 @@ module OmniAuth
       uid do
         if uid_api
           operation, key = uid_api.split('#')
-          raw_info[key].to_s
+          value = key.split('.').reduce(raw_info) { |memo, key| memo[key] }
+          value.to_s
         else
           uid_option = provider_options[OPTION_UID]
           if uid_option[OPTION_UID_PARAM]
@@ -90,8 +92,12 @@ module OmniAuth
 
         def raw_info
           if uid_api
+            api_options = {@definition.oauth2_key => {token: access_token.token}}
+            if provider_options[OPTION_SUBDOMAIN]
+              api_options[:subdomain] = provider_options[OPTION_SUBDOMAIN]
+            end
             api_class = Diesel.build_api(specification)
-            api = api_class.new(@definition.oauth2_key => {token: access_token.token})
+            api = api_class.new(api_options)
             operation, key = uid_api.split('#')
             api.__send__(operation, {})
           else

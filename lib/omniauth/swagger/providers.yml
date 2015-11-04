@@ -6,4 +6,6 @@
 :stripe_connect:
   uid:
     param: stripe_user_id
+:harvest:
+  uid: who_am_i#user.id
 

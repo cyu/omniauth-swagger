@@ -1,0 +1,16 @@
+---
+github:
+  client_id: GITHUB_CLIENT_ID
+  client_secret: GITHUB_CLIENT_SECRET
+  scope: user
+slack:
+  client_id: SLACK_CLIENT_ID
+  client_secret: SLACK_CLIENT_SECRET
+  scope: identity
+stripe_connect:
+  client_id: STRIPE_CONNECT_CLIENT_ID
+  client_secret: STRIPE_CONNECT_CLIENT_SECRET
+harvest
+  client_id: HARVEST_CLIENT_ID
+  client_secret: HARVEST_CLIENT_SECRET
+  subdomain: HARVEST_SUBDOMAIN

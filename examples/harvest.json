@@ -1,0 +1,39 @@
+{
+  "swagger": "2.0",
+
+  "info": {
+    "title": "Mandrill",
+    "version": "1.0"
+  },
+
+  "x-base-host": "harvestapp.com",
+
+  "basePath": "/",
+
+  "schemes": ["https"],
+
+  "produces": ["application/json", "application/xml"],
+
+  "securityDefinitions": {
+    "oauth2": {
+      "type": "oauth2",
+      "flow": "accessCode",
+      "authorizationUrl": "/oauth2/authorize",
+      "tokenUrl": "/oauth2/token",
+      "scopes": {}
+    }
+  },
+
+  "security": {
+    "oauth2": []
+  },
+
+  "paths": {
+    "/account/who_am_i": {
+      "get": {
+        "summary": "User and account information for current user",
+        "operationId": "whoAmI"
+      }
+    }
+  }
+}

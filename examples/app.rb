@@ -1,46 +1,37 @@
 require 'sinatra'
 require 'omniauth-swagger'
 require 'pry'
-require 'netrc'
+
+# Callback URL will look like this: http://localhost:4567/auth/swagger/callback
 
 # Store client_id as the login, secret as password
-n = Netrc.read(File.join(File.dirname(__FILE__), 'providers.netrc'))
+providers_config = YAML.load_file(File.join(File.dirname(__FILE__), "providers.yml"))
+providers_config.keys.each do |key|
+  providers_config[key][:uri] = File.join(File.dirname(__FILE__), "#{key}.json")
+end
 
 configure do
   enable :sessions
 
   use OmniAuth::Builder do
-    provider :swagger, providers: {
-      github: {
-        uri: File.join(File.dirname(__FILE__), 'github.json'),
-        client_id: n['github'][0],
-        client_secret: n['github'][1],
-        scope: 'user'
-      },
-      slack: {
-        uri: File.join(File.dirname(__FILE__), 'slack.json'),
-        client_id: n['slack'][0],
-        client_secret: n['slack'][1],
-        scope: 'identity'
-      },
-      stripe_connect: {
-        uri: File.join(File.dirname(__FILE__), 'stripe_connect.json'),
-        client_id: n['stripe_connect'][0],
-        client_secret: n['stripe_connect'][1]
-      }
-    }
+    providers_config = YAML.load_file(File.join(File.dirname(__FILE__), "providers.yml"))
+    providers_config.keys.each do |key|
+      providers_config[key][:uri] = File.join(File.dirname(__FILE__), "#{key}.json")
+    end
+    provider :swagger, providers: providers_config
   end
 end
 
 get '/' do
+  links = providers_config.keys.map do |key|
+    <<-HTML
+      <li><a href="/auth/swagger?provider=#{key}">#{key}</a></li>
+    HTML
+  end
   <<-HTML
     <html>
     <body>
-      <ol>
-        <li><a href="/auth/swagger?provider=github">Github</a></li>
-        <li><a href="/auth/swagger?provider=slack">Slack</a></li>
-        <li><a href="/auth/swagger?provider=stripe_connect">Stripe Connect</a></li>
-      </ol>
+      <ol> #{links.join} </ol>
     </body>
     </html>
   HTML
@@ -52,7 +43,15 @@ get '/auth/:provider/callback' do
     <html>
     <body>
       Provider: #{params['provider']}<br>
-      UID: #{auth['uid']}
+      UID: #{auth['uid']}<br>
+      Token: #{auth['credentials']['token']}<br>
+      Secret: #{auth['credentials']['token']}<br>
+      Expires: #{auth['credentials']['expires']}<br>
+      Expires At: #{auth['credentials']['expires_at']}<br>
+      Raw Info:<br>
+      <pre>
+        #{auth["extra"]["raw_info"]}
+      </pre>
     </body>
     </html>
   HTML
