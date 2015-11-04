@@ -102,7 +102,7 @@ module OmniAuth
         def load_definition
           specification.security_definitions.each_pair do |name, definition|
             if definition.type == 'oauth2'
-              @definition = OmniAuth::Swagger::OAuth2Definition.new(definition, provider_options)
+              @definition = OmniAuth::Swagger::OAuth2Definition.new(definition, specification, provider_options)
             end
           end
           nil
