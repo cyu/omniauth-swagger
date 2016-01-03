@@ -49,11 +49,14 @@ module OmniAuth
           value = key.split('.').reduce(raw_info) { |memo, key| memo[key] }
           value.to_s
         else
-          uid_option = provider_options[OPTION_UID]
-          if uid_option[OPTION_UID_PARAM]
-            access_token.params[uid_option[OPTION_UID_PARAM]]
+          if uid_option = provider_options[OPTION_UID]
+            if uid_option[OPTION_UID_PARAM]
+              access_token.params[uid_option[OPTION_UID_PARAM]]
+            else
+              raise "Unsupported UID option: #{uid_option.inspect}"
+            end
           else
-            raise "Unsupported UID option: #{uid_option.inspect}"
+            raise "Missing #{OPTION_UID} setting for provider '#{provider_name}'"
           end
         end
       end
