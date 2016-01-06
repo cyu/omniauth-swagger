@@ -1,6 +1,7 @@
 require 'omniauth-oauth2'
 require 'omniauth/swagger/oauth2_definition'
 require 'omniauth/swagger/default_provider_lookup'
+require 'omniauth/swagger/uid_options'
 require 'diesel'
 
 module OmniAuth
