@@ -9,8 +9,6 @@ module OmniAuth
     class Swagger < OmniAuth::Strategies::OAuth2
 
       OPTION_UID = 'uid'.freeze
-      OPTION_UID_API = 'api'.freeze
-      OPTION_UID_PARAM = 'param'.freeze
       OPTION_SPECIFICATION = 'specification'.freeze
       OPTION_SUBDOMAIN = 'subdomain'.freeze
 
@@ -44,20 +42,21 @@ module OmniAuth
       end
 
       uid do
-        if uid_api
-          operation, key = uid_api.split('#')
-          value = key.split('.').reduce(raw_info) { |memo, key| memo[key] }
-          value.to_s
+        if uid_options.nil?
+          raise "Missing #{OPTION_UID} setting for provider '#{provider_name}'"
+
+        elsif uid_options.api?
+          uid_options.
+            api_value_path.
+            split('.').
+            reduce(raw_info) { |memo, key| memo[key] }.
+            to_s
+
+        elsif uid_options.access_token_param?
+          access_token.params[uid_options.param]
+
         else
-          if uid_option = provider_options[OPTION_UID]
-            if uid_option[OPTION_UID_PARAM]
-              access_token.params[uid_option[OPTION_UID_PARAM]]
-            else
-              raise "Unsupported UID option: #{uid_option.inspect}"
-            end
-          else
-            raise "Missing #{OPTION_UID} setting for provider '#{provider_name}'"
-          end
+          raise "Unsupported UID option: #{uid_options.inspect}"
         end
       end
 
@@ -88,21 +87,19 @@ module OmniAuth
                                end
         end
 
-        def uid_api
-          opt = provider_options[OPTION_UID]
-          opt.kind_of?(Hash) ? opt[OPTION_UID_API] : opt
+        def uid_options
+          @uid_options ||= OmniAuth::Swagger::UIDOptions.from_options(provider_options[OPTION_UID])
         end
 
         def raw_info
-          if uid_api
+          if uid_options
             api_options = {@definition.oauth2_key => {token: access_token.token}}
             if provider_options[OPTION_SUBDOMAIN]
               api_options[:subdomain] = provider_options[OPTION_SUBDOMAIN]
             end
             api_class = Diesel.build_api(specification)
             api = api_class.new(api_options)
-            operation, key = uid_api.split('#')
-            api.__send__(operation, {})
+            api.__send__(uid_options.api_operation, uid_options.api_params)
           else
             {}
           end
