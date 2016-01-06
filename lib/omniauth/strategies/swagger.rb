@@ -47,17 +47,21 @@ module OmniAuth
           raise "Missing #{OPTION_UID} setting for provider '#{provider_name}'"
 
         elsif uid_options.api?
-          uid_options.
+          val = uid_options.
             api_value_path.
             split('.').
-            reduce(raw_info) { |memo, key| memo[key] }.
-            to_s
+            reduce(raw_info) { |memo, key| memo && memo[key] }
+          if val
+            val.to_s
+          else
+            raise "Invalid UID value path #{uid_options.api_value_path}: #{raw_info.inspect}"
+          end
 
         elsif uid_options.access_token_param?
           access_token.params[uid_options.param]
 
         else
-          raise "Unsupported UID option: #{uid_options.inspect}"
+          raise "Unsupported UID option: #{provider_options[OPTION_UID].inspect}"
         end
       end
 
