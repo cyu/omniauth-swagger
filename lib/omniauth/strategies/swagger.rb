@@ -71,7 +71,12 @@ module OmniAuth
 
       protected
         def provider_name
-          @provider_name ||= request.params[options[:provider_param]].to_sym
+          @provider_name ||= begin
+                               unless nm = request.params[options[:provider_param]]
+                                 raise OmniAuth::Error, "Unable to determine provider"
+                               end
+                               nm.to_sym
+                             end
         end
 
         def provider_options
