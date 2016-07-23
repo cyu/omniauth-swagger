@@ -2,7 +2,7 @@ require 'omniauth-oauth2'
 require 'omniauth/swagger/oauth2_definition'
 require 'omniauth/swagger/default_provider_lookup'
 require 'omniauth/swagger/uid_options'
-require 'diesel'
+require 'apiture'
 
 module OmniAuth
   module Strategies
@@ -107,9 +107,9 @@ module OmniAuth
             if provider_options[OPTION_SUBDOMAIN]
               api_options[:subdomain] = provider_options[OPTION_SUBDOMAIN]
             end
-            api_class = Diesel.build_api(specification)
+            api_class = Apiture.build_api(specification)
             api = api_class.new(api_options)
-            api.__send__(uid_options.api_operation, uid_options.api_params)
+            api.__send__(uid_options.api_operation, uid_options.api_params).body
           else
             {}
           end

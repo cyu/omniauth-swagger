@@ -30,7 +30,7 @@ module OmniAuth
           opts[OmniAuth::Strategies::Swagger::OPTION_SPECIFICATION] = Proc.new{
             spec = nil
             open(uri) do |f|
-              spec = Diesel::Swagger::Parser.new.parse(f)
+              spec = Apiture::Swagger::Parser.new.parse(f)
             end
             spec
           }
